@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Enhanced Matrix Rain Effect */
+.matrix-code {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.matrix-code span {
+  position: absolute;
+  font-family: monospace;
+  font-size: 1.2rem;
+  color: #00ff00;
+  text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+  animation: matrix-rain 2s linear infinite;
+}
+
+@keyframes matrix-rain {
+  0% {
+    transform: translateY(-100%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+/* Digital Circuit Lines */
+.circuit-lines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  background: 
+    linear-gradient(90deg, #00ff00 1px, transparent 1px) 0 0 / 50px 50px,
+    linear-gradient(0deg, #00ff00 1px, transparent 1px) 0 0 / 50px 50px;
+}
+
+.circuit-node {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #00ff00;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #00ff00;
+}
+
+/* Animated Connection Lines */
+.connection-line {
+  stroke-dasharray: 10;
+  animation: dash 20s linear infinite;
+  filter: drop-shadow(0 0 2px #4ade80);
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+/* Digital Pulse Effect */
+.digital-pulse {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 255, 0, 0.2);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Character Avatar Animation */
+.character-avatar {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Enhanced Matrix Background */
+.matrix-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.matrix-column {
+  position: absolute;
+  top: -20px;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  animation: matrix-fall 2s linear infinite;
+}
+
+@keyframes matrix-fall {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* Cyber Grid */
+.cyber-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+  animation: grid-move 20s linear infinite;
+}
+
+@keyframes grid-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}
+
+/* Room Grid Layout */
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(250px, 1fr));
+}
