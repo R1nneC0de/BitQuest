@@ -34,7 +34,7 @@ const Home = () => {
         
         <div className="flex flex-col gap-6 w-80 mx-auto">
           <button
-            onClick={() => navigate('/rooms')}
+            onClick={() => navigate('/login')}
             className={`group relative px-8 py-4 ${getButtonBgClass()} border-2 border-[var(--accent-secondary)] rounded-lg overflow-hidden hover:scale-105 transition-all duration-300`}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-secondary)]/20 to-[var(--accent-primary)]/20 transform translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
