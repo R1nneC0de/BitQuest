@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Unlock, Cpu, Shield, Coins, Heart } from 'lucide-react';
+import { Lock, Unlock, Cpu, Shield, Coins, Heart, ArrowLeft } from 'lucide-react';
 import CircuitLines from '../components/CircuitLines';
 import CharacterAvatar from '../components/CharacterAvatar';
+import ReturnButton from '../components/ReturnButton';
 
 const rooms = [
   {
@@ -44,7 +45,8 @@ const RoomSelection = () => {
   const [hoveredRoom, setHoveredRoom] = React.useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[var(--gradient-start)] via-[var(--gradient-mid)] to-[var(--gradient-end)] relative overflow-hidden">
+      <ReturnButton />
       <div className="cyber-grid" />
       <CircuitLines />
       <CharacterAvatar />

@@ -158,3 +158,65 @@
 .grid-cols-4 {
   grid-template-columns: repeat(4, minmax(250px, 1fr));
 }
+
+/* Theme Styles */
+.theme-dark {
+  --bg-primary: theme('colors.gray.900');
+  --bg-secondary: theme('colors.gray.800');
+  --text-primary: theme('colors.white');
+  --text-secondary: theme('colors.gray.300');
+  --accent-primary: theme('colors.blue.400');
+  --accent-secondary: theme('colors.green.400');
+  --border-color: theme('colors.gray.700');
+  --gradient-start: theme('colors.gray.900');
+  --gradient-mid: theme('colors.gray.800');
+  --gradient-end: theme('colors.gray.900');
+}
+
+.theme-light {
+  --bg-primary: theme('colors.gray.100');
+  --bg-secondary: theme('colors.white');
+  --text-primary: theme('colors.gray.900');
+  --text-secondary: theme('colors.gray.600');
+  --accent-primary: theme('colors.blue.600');
+  --accent-secondary: theme('colors.green.600');
+  --border-color: theme('colors.gray.300');
+  --gradient-start: theme('colors.gray.100');
+  --gradient-mid: theme('colors.white');
+  --gradient-end: theme('colors.gray.100');
+}
+
+.theme-matrix {
+  --bg-primary: theme('colors.black');
+  --bg-secondary: theme('colors.gray.900');
+  --text-primary: theme('colors.green.400');
+  --text-secondary: theme('colors.green.600');
+  --accent-primary: theme('colors.green.400');
+  --accent-secondary: theme('colors.green.600');
+  --border-color: theme('colors.green.900');
+  --gradient-start: theme('colors.black');
+  --gradient-mid: theme('colors.gray.900');
+  --gradient-end: theme('colors.black');
+}
+
+/* Apply theme variables */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.bg-theme-primary {
+  background-color: var(--bg-primary);
+}
+
+.bg-theme-secondary {
+  background-color: var(--bg-secondary);
+}
+
+.text-theme-primary {
+  color: var(--text-primary);
+}
+
+.text-theme-secondary {
+  color: var(--text-secondary);
+}

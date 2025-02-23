@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
+import { useSettings } from '../contexts/SettingsContext';
 
 const CircuitLines = () => {
+  const { theme } = useSettings();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -76,7 +78,19 @@ const CircuitLines = () => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none opacity-30" />;
+  return (
+    <div 
+      className="circuit-lines" 
+      style={{
+        background: `
+          linear-gradient(90deg, var(--accent-secondary) 1px, transparent 1px) 0 0 / 50px 50px,
+          linear-gradient(0deg, var(--accent-secondary) 1px, transparent 1px) 0 0 / 50px 50px
+        `
+      }}
+    >
+      <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none opacity-30" />
+    </div>
+  );
 };
 
 export default CircuitLines;
