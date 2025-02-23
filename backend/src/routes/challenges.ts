@@ -3,6 +3,7 @@ import Challenge from '../models/Challenge';
 import Progress from '../models/Progress';
 import { generateChallenge } from '../services/ollamaService';
 import { authMiddleware } from '../middleware/auth';
+import { runCode } from '../services/codeExecutionService';
 
 // Define interface for authenticated request
 interface AuthRequest extends Request {
@@ -12,15 +13,30 @@ interface AuthRequest extends Request {
   };
 }
 
+// Define interface for test case
+interface TestCase {
+  input: string;
+  output: string;
+}
+
+// Define interface for test result
+interface TestResult {
+  input: string;
+  expectedOutput?: string;
+  actualOutput?: string;
+  error?: string;
+  passed: boolean;
+}
+
 const router = express.Router();
 
 // Get challenges for a room
 router.get('/room/:roomId', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const { roomId } = req.params;
-    console.log('Fetching challenges for room:', roomId); // Debug log
+    console.log('Fetching challenges for room:', roomId);
     const challenges = await Challenge.find({ roomId: Number(roomId) });
-    console.log('Found challenges:', challenges); // Debug log
+    console.log('Found challenges:', challenges);
     res.json({ data: challenges });
   } catch (error) {
     console.error('Error fetching challenges:', error);
@@ -54,11 +70,11 @@ router.post('/:challengeId/run', authMiddleware, async (req: AuthRequest, res) =
     const { challengeId } = req.params;
     const { code, language } = req.body;
     
-    // Here you would actually run the code and get output
-    // For now, we'll just return the code as output
-    res.json({ output: `Running ${language} code:\n${code}` });
-  } catch (error) {
-    res.status(500).json({ error: 'Error running code' });
+    const output = await runCode(code, language);
+    res.json({ output });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.status(500).json({ error: 'Error running code: ' + errorMessage });
   }
 });
 
@@ -69,15 +85,70 @@ router.post('/:challengeId/submit', authMiddleware, async (req: AuthRequest, res
     const { code, language } = req.body;
     const userId = req.user?.id;
 
-    // Here you would:
-    // 1. Run the code against all test cases
-    // 2. Update the user's progress
-    // 3. Return success/failure
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
 
-    // For now, we'll just return success
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: 'Error submitting solution' });
+    const challenge = await Challenge.findOne({ challengeId: Number(challengeId) });
+    if (!challenge) {
+      return res.status(404).json({ error: 'Challenge not found' });
+    }
+
+    let allTestsPassed = true;
+    const results: TestResult[] = [];
+
+    for (const testCase of challenge.testCases as TestCase[]) {
+      try {
+        const output = await runCode(code, language, testCase.input || '');
+        // Normalize both outputs by trimming whitespace and converting to lowercase
+        const normalizedOutput = output.trim().toLowerCase();
+        const normalizedExpected = testCase.output.trim().toLowerCase();
+        const passed = normalizedOutput === normalizedExpected;
+        
+        results.push({
+          input: testCase.input,
+          expectedOutput: testCase.output,
+          actualOutput: output,
+          passed
+        });
+        
+        if (!passed) allTestsPassed = false;
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        results.push({
+          input: testCase.input,
+          error: errorMessage,
+          passed: false
+        });
+        allTestsPassed = false;
+      }
+    }
+
+    if (allTestsPassed) {
+      await Progress.findOneAndUpdate(
+        { userId, challengeId: Number(challengeId) },
+        { completed: true },
+        { upsert: true }
+      );
+      
+      res.json({ 
+        success: true, 
+        message: 'All test cases passed! Challenge completed!',
+        results 
+      });
+    } else {
+      res.json({ 
+        success: false, 
+        message: 'Some test cases failed. Try again!',
+        results 
+      });
+    }
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    res.status(500).json({ 
+      error: 'Error submitting solution: ' + errorMessage,
+      success: false 
+    });
   }
 });
 

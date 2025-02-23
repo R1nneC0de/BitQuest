@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Code2, CheckCircle, Terminal, Cpu, Loader, ExternalLink } from 'lucide-react';
+import { Code2, CheckCircle, Terminal, Cpu, Loader, ExternalLink, XCircle, Play, Send, RefreshCw } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import ReturnButton from '../components/ReturnButton';
 import api from '../config/api';
@@ -51,6 +51,9 @@ const Challenges = () => {
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  const [runOutput, setRunOutput] = useState('');
+  const [testResults, setTestResults] = useState<any[]>([]);
+  const [runStatus, setRunStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     fetchChallenges();
@@ -81,34 +84,55 @@ const Challenges = () => {
 
   const runCode = async () => {
     setIsRunning(true);
+    setRunStatus('idle');
     try {
       const response = await api.post(`/challenges/${selectedChallenge}/run`, {
         code,
         language: selectedLanguage
       });
-      setOutput(response.data.output);
+      setRunOutput(response.data.output);
+      setRunStatus('success');
     } catch (error: any) {
-      setOutput(error.response?.data?.error || 'Error running code');
+      setRunOutput(error.response?.data?.error || 'Error running code');
+      setRunStatus('error');
     } finally {
       setIsRunning(false);
     }
   };
 
   const handleSubmit = async () => {
+    setIsRunning(true);
+    setTestResults([]);
     try {
       const response = await api.post(`/challenges/${selectedChallenge}/submit`, {
         code,
         language: selectedLanguage
       });
+      
+      setTestResults(response.data.results);
+      setRunOutput(response.data.message);
+      setRunStatus(response.data.success ? 'success' : 'error');
+      
       if (response.data.success) {
-        // Update challenge status
+        // Refresh challenges to update completion status
         fetchChallenges();
-        setOutput('All test cases passed! Challenge completed!');
-      } else {
-        setOutput('Some test cases failed. Try again!');
       }
     } catch (error: any) {
-      setOutput(error.response?.data?.error || 'Error submitting solution');
+      setRunOutput(error.response?.data?.error || 'Error submitting solution');
+      setRunStatus('error');
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const handleRestart = () => {
+    setRunOutput('');
+    setTestResults([]);
+    setRunStatus('idle');
+    setOutput('');
+    // Reset code to starter code
+    if (selectedChallengeData) {
+      setCode(selectedChallengeData.starterCode[selectedLanguage]);
     }
   };
 
@@ -218,12 +242,49 @@ const Challenges = () => {
               </div>
               
               <div className="space-y-4">
-                <div className="bg-black rounded-lg p-4 h-[400px] font-mono text-green-400 overflow-auto">
+                <div className="bg-black rounded-lg p-4 h-[400px] font-mono overflow-auto">
                   <div className="flex items-center gap-2 mb-2">
-                    <Terminal size={16} />
+                    <Terminal size={16} className={
+                      runStatus === 'success' ? 'text-green-400' :
+                      runStatus === 'error' ? 'text-red-400' :
+                      'text-gray-400'
+                    } />
                     <span>Output:</span>
                   </div>
-                  <pre className="whitespace-pre-wrap">{output}</pre>
+                  <pre className={`whitespace-pre-wrap ${
+                    runStatus === 'success' ? 'text-green-400' :
+                    runStatus === 'error' ? 'text-red-400' :
+                    'text-gray-400'
+                  }`}>
+                    {runOutput}
+                  </pre>
+
+                  {testResults.length > 0 && (
+                    <div className="mt-4 border-t border-gray-700 pt-4">
+                      <div className="text-gray-400 mb-2">Test Results:</div>
+                      {testResults.map((result, index) => (
+                        <div key={index} className={`mb-2 p-2 rounded ${
+                          result.passed ? 'bg-green-900/30' : 'bg-red-900/30'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            {result.passed ? (
+                              <CheckCircle size={16} className="text-green-400" />
+                            ) : (
+                              <XCircle size={16} className="text-red-400" />
+                            )}
+                            <span className={result.passed ? 'text-green-400' : 'text-red-400'}>
+                              Test Case {index + 1}
+                            </span>
+                          </div>
+                          <div className="text-gray-400 text-sm mt-1">
+                            <div>Input: {result.input}</div>
+                            <div>Expected: {result.expectedOutput}</div>
+                            <div>Got: {result.actualOutput || result.error}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -232,17 +293,54 @@ const Challenges = () => {
               <button
                 onClick={runCode}
                 disabled={isRunning}
-                className="px-6 py-3 bg-[var(--accent-secondary)] text-white rounded hover:bg-[var(--accent-secondary)]/80 transition-colors disabled:opacity-50"
+                className={`px-6 py-3 rounded flex items-center gap-2 transition-colors ${
+                  isRunning
+                    ? 'bg-gray-700 text-gray-300'
+                    : 'bg-[var(--accent-secondary)] text-white hover:bg-[var(--accent-secondary)]/80'
+                }`}
               >
-                {isRunning ? 'Running...' : 'Run Code'}
+                {isRunning ? (
+                  <>
+                    <Loader size={16} className="animate-spin" />
+                    Running...
+                  </>
+                ) : (
+                  <>
+                    <Play size={16} />
+                    Run Code
+                  </>
+                )}
               </button>
 
               <button
                 onClick={handleSubmit}
                 disabled={isRunning}
-                className="px-6 py-3 bg-[var(--accent-primary)] text-white rounded hover:bg-[var(--accent-primary)]/80 transition-colors disabled:opacity-50"
+                className={`px-6 py-3 rounded flex items-center gap-2 transition-colors ${
+                  isRunning
+                    ? 'bg-gray-700 text-gray-300'
+                    : 'bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-primary)]/80'
+                }`}
               >
-                Submit Solution
+                {isRunning ? (
+                  <>
+                    <Loader size={16} className="animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} />
+                    Submit Solution
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={handleRestart}
+                disabled={isRunning}
+                className="px-6 py-3 rounded flex items-center gap-2 bg-gray-600 text-white hover:bg-gray-700 transition-colors"
+              >
+                <RefreshCw size={16} />
+                Restart
               </button>
             </div>
 
