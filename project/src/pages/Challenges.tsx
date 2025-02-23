@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Code2, CheckCircle, Terminal, Cpu } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
+import ReturnButton from '../components/ReturnButton';
 
 interface Challenge {
   id: number;
@@ -55,7 +56,8 @@ const Challenges = () => {
   const [selectedChallenge, setSelectedChallenge] = React.useState<number | null>(null);
 
   return (
-    <div className="min-h-screen p-8 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[var(--gradient-start)] via-[var(--gradient-mid)] to-[var(--gradient-end)] relative overflow-hidden">
+      <ReturnButton />
       {/* Matrix Rain Background */}
       <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
         <div className="matrix-code">
